@@ -4,7 +4,14 @@ set -e
 
 echo "Compiling stacktrace.cpp"
 g++ -g -o stacktrace.o -c stacktrace.cpp
+echo "Compiling C wrappers to stacktrace.cpp"
+g++ -g -o c_stacktrace.o -c c_stacktrace.cpp
+
 echo "Compiling test1.cpp"
 g++ -g -o test1.o -c test1.cpp
 echo "Linking test1"
 g++ -o test1 test1.o stacktrace.o -lbfd -liberty
+echo "Compiling test2.c"
+gcc -g -o test2.o -c test2.c
+echo "Linking test2"
+g++ -o test2 test2.o stacktrace.o c_stacktrace.o -lbfd -liberty
