@@ -28,7 +28,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 #include "stacktrace.hpp"
-//#include "Teuchos_RCP.hpp"
 
 
 #ifdef HAVE_TEUCHOS_STACKTRACE
@@ -36,7 +35,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <string>
 #include <iostream>
+#include <sstream>
 #include <fstream>
+#include <vector>
 
 // free() and abort() functions
 #include <cstdlib>
@@ -70,10 +71,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #else
   typedef long long unsigned bfd_vma;
 #endif
-
-using Teuchos::RCP;
-using Teuchos::rcp;
-using Teuchos::null;
 
 namespace {
 
@@ -364,11 +361,16 @@ class StacktraceAddresses {
     std::vector<bfd_vma> stacktrace_buffer;
     int impl_stacktrace_depth;
 public:
-    StacktraceAddresses(void *const *_stacktrace_buffer, int _size, int _impl_stacktrace_depth)
-      : impl_stacktrace_depth(_impl_stacktrace_depth)
+    StacktraceAddresses(): impl_stacktrace_depth(0) {}
+    void add_addresses(void *const *_stacktrace_buffer, int _size,
+            int _impl_stacktrace_depth)
     {
+        // Remove old addresses first
+        this->stacktrace_buffer.clear();
+
+        this->impl_stacktrace_depth = _impl_stacktrace_depth;
         for (int i=0; i < _size; i++)
-            stacktrace_buffer.push_back((bfd_vma) _stacktrace_buffer[i]);
+            this->stacktrace_buffer.push_back((bfd_vma) _stacktrace_buffer[i]);
     }
     bfd_vma get_address(int i) const {
         return this->stacktrace_buffer[i];
@@ -449,18 +451,19 @@ void loc_abort_callback_print_stack(int sig_num)
 }
 
 
-RCP<StacktraceAddresses> get_stacktrace_addresses(int impl_stacktrace_depth)
+void get_stacktrace_addresses(int impl_stacktrace_depth,
+        StacktraceAddresses &stacktrace_addresses)
 {
     const int STACKTRACE_ARRAY_SIZE = 100; // 2010/09/22: rabartl: Is this large enough?
     void *stacktrace_array[STACKTRACE_ARRAY_SIZE];
     const size_t stacktrace_size = backtrace(stacktrace_array,
             STACKTRACE_ARRAY_SIZE);
-    return rcp(new StacktraceAddresses(stacktrace_array, stacktrace_size,
-        impl_stacktrace_depth+1));
+    stacktrace_addresses.add_addresses(stacktrace_array, stacktrace_size,
+        impl_stacktrace_depth+1);
 }
 
 
-RCP<StacktraceAddresses> last_stacktrace;
+StacktraceAddresses last_stacktrace;
 
 } // Unnamed namespace
 
@@ -471,25 +474,26 @@ RCP<StacktraceAddresses> last_stacktrace;
 void Teuchos::store_stacktrace()
 {
     const int impl_stacktrace_depth=1;
-    last_stacktrace = get_stacktrace_addresses(impl_stacktrace_depth);
+    get_stacktrace_addresses(impl_stacktrace_depth, last_stacktrace);
 }
 
 
 std::string Teuchos::get_stored_stacktrace()
 {
-    if (last_stacktrace == null) {
+    if (last_stacktrace.get_size() == 0) {
         return "";
     }
     else {
-        return stacktrace2str(*last_stacktrace);
+        return stacktrace2str(last_stacktrace);
     }
 }
 
 
 std::string Teuchos::get_stacktrace(int impl_stacktrace_depth)
 {
-    RCP<StacktraceAddresses> addresses = get_stacktrace_addresses(impl_stacktrace_depth+1);
-    return stacktrace2str(*addresses);
+    StacktraceAddresses addresses;
+    get_stacktrace_addresses(impl_stacktrace_depth+1, addresses);
+    return stacktrace2str(addresses);
 }
 
 
