@@ -28,12 +28,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // C interface to the stacktrace code
 
+#include <iostream>
 #include "stacktrace.hpp"
 #include "c_stacktrace.h"
 
 void show_stacktrace()
 {
-    Teuchos::show_stacktrace();
+    const int impl_stacktrace_depth=1;
+    std::cout << Teuchos::get_stacktrace(impl_stacktrace_depth);
 }
 
 void print_stack_on_segfault()
