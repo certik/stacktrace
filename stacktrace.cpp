@@ -59,14 +59,23 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <cxxabi.h>
 
 #ifdef HAVE_TEUCHOS_LINK
-// For dl_iterate_phdr() functionality
+// For dl_iterate_phdr() functionality. This is needed in order to read symbols
+// from shared libraries. Without it, stacktrace will still work, but only for
+// symbols in the current executable, all symbols in shared libraries will just
+// print "File unknown, address: 0x140420334841216".
 #include <link.h>
 #endif
 
 #ifdef HAVE_TEUCHOS_BFD
   // For bfd_* family of functions for loading debugging symbols from the binary
   // This is the only nonstandard header file and the binary needs to be linked
-  // with "-lbfd".
+  // with "-lbfd -liberty" (the libiberty library is sometimes included in the
+  // bfd, so doesn't need to be linked with on some systems)
+  //
+  // Without it, the stacktrace will only print a list of raw addresses
+  // "File unknown, address: 0x4200328"
+  // instead of:
+  // File "/home/ondrej/repos/stacktrace/test1.cpp", line 23, in main()
 #  include <bfd.h>
 #else
   typedef long long unsigned bfd_vma;
@@ -307,7 +316,13 @@ std::string addr2str(std::string file_name, bfd_vma addr)
             }
         } else {
             // The file is unknown (and data.line == 0 in this case), so the
-            // only meaningful thing to print is the function name:
+            // only meaningful thing to print is the function name. This
+            // usually happens for the kernel functions at the
+            // beginning of each stacktrace:
+            // File unknown, in _start()
+            // File unknown, in __libc_start_main()
+            // File "/.../stacktrace/test1.cpp", line 23, in main()
+            // ...
             s << "  File unknown, in " << name;
         }
     }
