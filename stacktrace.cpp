@@ -164,6 +164,14 @@ std::string demangle_function_name(std::string name)
         if (d) {
             s = d;
             free(d);
+            if (s.size() > 0) {
+                if (s[s.size()-1] != ')') {
+                    // This means that the C++ demangler failed for some
+                    // reason, as each symbol needs to end with ")". As such,
+                    // just return the original version:
+                    s = name + "()";
+                }
+            }
         } else {
             s = name + "()";
         }
