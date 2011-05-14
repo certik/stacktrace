@@ -34,7 +34,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 \brief Functions for returning stacktrace info (GCC only initially).
 */
 
-#include "Teuchos_ConfigDefs.hpp"
+//#include "Teuchos_ConfigDefs.hpp"
 
 
 #ifdef HAVE_TEUCHOS_STACKTRACE

@@ -27,8 +27,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 
-#include "Teuchos_stacktrace.hpp"
-#include "Teuchos_RCP.hpp"
+#include "stacktrace.hpp"
+//#include "Teuchos_RCP.hpp"
 
 
 #ifdef HAVE_TEUCHOS_STACKTRACE
