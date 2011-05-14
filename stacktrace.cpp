@@ -442,6 +442,15 @@ std::string stacktrace2str(const StacktraceAddresses &stacktrace_addresses)
             full_stacktrace_str += addr2str("/proc/self/exe", match.addr_in_file);
         }
     }
+#ifndef HAVE_TEUCHOS_BFD
+    // This means that we cannot access the symbols
+    full_stacktrace_str += "\nOnly raw addresses are printed, because the stacktrace code is compiled without\nBFD support. Enable BFD to see file names, line numbers and symbol names.\n";
+#else
+#ifndef HAVE_TEUCHOS_LINK
+    // This means that we cannot access shared libs
+    full_stacktrace_str += "\nSymbols in shared libraries cannot be accessed, because the stacktrace code\nis compiled without LINK support. Enable LINK to see file names, line numbers\nand symbol names in shared libraries.\n";
+#endif
+#endif
 
     return full_stacktrace_str;
 }
