@@ -6,6 +6,11 @@ filenames, line numbers, function names and the line itself.
 
 It works for shared libraries too.
 
+License
+-------
+
+Stacktrace is BSD licensed. See the LICENSE file for more details.
+
 Example of a stacktrace
 -----------------------
 
