@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2010, Ondrej Certik
+Copyright (c) 2010, 2011 Ondrej Certik
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
