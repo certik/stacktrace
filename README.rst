@@ -38,7 +38,7 @@ The only requirement is the ``binutils`` package. On Ubuntu, do::
     sudo apt-get install binutils-dev
 
 Stacktrace is written in C++ and besides binutils doesn't have any other
-dependencies. C wrapper is included.
+dependencies. C wrapper is included for usage in programs written in C.
 
 Usage
 -----
